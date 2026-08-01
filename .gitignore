@@ -1,0 +1,16 @@
+.ipynb_checkpoints/
+t20-json-files/*.json
+
+# Virtual environments
+test_env/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS/editor cruft
+.DS_Store
+.vscode/
+*.log
