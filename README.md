@@ -9,8 +9,7 @@ data, structuring it in a proper database, uncovering patterns through
 SQL, and finally building a model that predicts outcomes and explains its
 own reasoning.
 
-* Live App:** [Add your Streamlit Community Cloud link here]
-* Power BI Dashboard:** [Add link/screenshot here, if included]
+* Live App:** [https://cricket-t20-analytics-win-prediction-bxmvtuymar3kjq5ivynvjr.streamlit.app/]
 
 ---
 
