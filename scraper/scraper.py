@@ -17,10 +17,6 @@ def get_match_links(tournament_url: str) -> List[str]:
     """
     Get all match scorecard links from a tournament page.
     
-    Why this structure: This is a helper function used by multiple scrapers.
-    Extracting it separately avoids code duplication - we need match links for
-    batting, bowling, and player info scraping.
-    
     Args:
         tournament_url: URL of the tournament match results page
         
@@ -37,7 +33,7 @@ def get_match_links(tournament_url: str) -> List[str]:
     
     links = []
     # Find all rows in the match results table
-    # Using the same selector as original: table.engineTable > tbody > tr.data1
+   
     rows = soup.select('table.engineTable > tbody > tr.data1')
     
     for row in rows:
@@ -56,11 +52,6 @@ def get_match_links(tournament_url: str) -> List[str]:
 def scrape_batting_summary(tournament_url: str) -> List[Dict]:
     """
     Scrape batting summary for all matches in a tournament.
-    
-    Why this structure: 
-    - Separated into two logical steps: get links, then scrape each match
-    - Each match produces batting data for both innings
-    - Returns a flat list of all batting records (easy to convert to DataFrame later)
     
     Args:
         tournament_url: URL of the tournament match results page
@@ -84,7 +75,7 @@ def scrape_batting_summary(tournament_url: str) -> List[Dict]:
             soup = BeautifulSoup(response.text, 'html.parser')
             
             # Extract team names from match details section
-            # Original logic: find div with "Match Details" span, get siblings
+           
             match_divs = soup.find_all('div')
             match_details_div = None
             for div in match_divs:
@@ -108,7 +99,7 @@ def scrape_batting_summary(tournament_url: str) -> List[Dict]:
                 continue
             
             # Find batting scorecard tables
-            # Original: div > table.ci-scorecard-table
+           
             tables = soup.select('div > table.ci-scorecard-table')
             
             if len(tables) < 2:
@@ -158,7 +149,7 @@ def scrape_batting_summary(tournament_url: str) -> List[Dict]:
             continue
     
     # Recalculate batting positions per innings
-    # Why: The original logic calculated position per innings, not globally
+    
     current_match = None
     current_innings = None
     position_counter = 1
@@ -178,11 +169,6 @@ def scrape_batting_summary(tournament_url: str) -> List[Dict]:
 def scrape_bowling_summary(tournament_url: str) -> List[Dict]:
     """
     Scrape bowling summary for all matches in a tournament.
-    
-    Why this structure:
-    - Similar to batting summary but extracts bowling-specific tables
-    - Bowling team is the OPPOSITE of the batting team (they bowl against each other)
-    - Uses different table selector (ds-table vs ci-scorecard-table)
     
     Args:
         tournament_url: URL of the tournament match results page
@@ -229,7 +215,7 @@ def scrape_bowling_summary(tournament_url: str) -> List[Dict]:
                 continue
             
             # Find bowling tables
-            # Original: div > table.ds-table, tables at indices 1 and 3
+            
             tables = soup.select('div > table.ds-table')
             
             if len(tables) < 4:
@@ -237,7 +223,7 @@ def scrape_bowling_summary(tournament_url: str) -> List[Dict]:
                 continue
             
             # Process first innings bowling (table index 1)
-            # Bowling team is team2 (they bowl against team1's batting)
+            
             first_innings_rows = tables[1].select('tbody > tr')
             for row in first_innings_rows:
                 tds = row.find_all('td')
@@ -260,7 +246,7 @@ def scrape_bowling_summary(tournament_url: str) -> List[Dict]:
                     all_bowling_data.append(bowling_data)
             
             # Process second innings bowling (table index 3)
-            # Bowling team is team1 (they bowl against team2's batting)
+            
             second_innings_rows = tables[3].select('tbody > tr')
             for row in second_innings_rows:
                 tds = row.find_all('td')
@@ -293,11 +279,6 @@ def scrape_bowling_summary(tournament_url: str) -> List[Dict]:
 def scrape_player_info(tournament_url: str) -> List[Dict]:
     """
     Scrape player information (batting style, bowling style, playing role, description).
-    
-    Why this structure:
-    - Three-stage process: get match links → extract player links from matches → scrape each player page
-    - This is necessary because player info is on individual player profile pages, not match pages
-    - Deduplication is needed since same player appears in multiple matches
     
     Args:
         tournament_url: URL of the tournament match results page
@@ -386,7 +367,7 @@ def scrape_player_info(tournament_url: str) -> List[Dict]:
             continue
     
     # Deduplicate player links (same player may appear in multiple matches)
-    # Why: We only need to scrape each player's profile once
+    
     unique_player_links = list(set(all_player_links))
     logger.info(f"Found {len(unique_player_links)} unique players")
     
@@ -465,11 +446,6 @@ def scrape_player_info(tournament_url: str) -> List[Dict]:
 def scrape_match_results(tournament_url: str) -> List[Dict]:
     """
     Scrape match results summary from tournament page.
-    
-    Why this structure:
-    - Simplest of all scrapers - only needs the tournament page, not individual match pages
-    - Direct table extraction from the main results page
-    - Returns one record per match with basic match info
     
     Args:
         tournament_url: URL of the tournament match results page
